@@ -1,5 +1,5 @@
-# ✅ Style-conditioned DeepSVG 모델 학습 코드
-# 목적: 다양한 손글씨 스타일에 대해 스타일 벡터를 조건으로 SVG 토큰 시퀀스를 생성할 수 있도록 학습
+ 모델 학습 코드
+ 다양한 손글씨 스타일에 대해 스타일 벡터를 조건으로 SVG 토큰 시퀀스를 생성할 수 있도록 학습
 
 import torch
 import torch.nn as nn
@@ -13,13 +13,13 @@ import pickle
 from tqdm import tqdm
 from stylized_svg_model import StyleConditionedTransformer
 
-# ===== 데이터셋 경로 설정 =====
+# 데이터셋 경로 설정
 DATASET_DIR = "D:/바탕화면/project/data/token_dataset"
 TRAIN_PKL = os.path.join(DATASET_DIR, "train.pkl")
 VAL_PKL = os.path.join(DATASET_DIR, "val.pkl")
 TEST_PKL = os.path.join(DATASET_DIR, "test.pkl")
 
-# ✍️ 사용자 정의 데이터셋: (이미지, token 시퀀스) 반환
+#사용자 정의 데이터셋: 이미지, token 시퀀스 반환
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class TokenSequenceDataset(Dataset):
@@ -35,7 +35,7 @@ class TokenSequenceDataset(Dataset):
         token_seq = token_seq + [0] * (self.max_seq_len - len(token_seq))
         return torch.tensor(token_seq, dtype=torch.long)
 
-# ✅ 데이터셋 로딩
+# 데이터셋 로딩
 with open(TRAIN_PKL, "rb") as f:
     train_tokens = pickle.load(f)
 with open(VAL_PKL, "rb") as f:
@@ -47,7 +47,7 @@ val_dataset = TokenSequenceDataset(val_tokens)
 train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
 
-# ✅ 모델 초기화
+# 모델 초기화
 embedding_dim = 128
 vocab_size = 512
 max_seq_len = 128
@@ -56,7 +56,7 @@ d_model = 256
 style_encoder = StyleEncoder(embedding_dim=embedding_dim).to(device)
 generator = StyleConditionedTransformer(vocab_size=vocab_size, d_model=d_model, style_dim=embedding_dim).to(device)
 
-# ✅ 옵티마이저 및 손실 함수
+# 옵티마이저 및 손실 함수
 params = list(style_encoder.parameters()) + list(generator.parameters())
 optimizer = optim.Adam(params, lr=1e-4)
 criterion = nn.CrossEntropyLoss(ignore_index=0)
@@ -72,7 +72,7 @@ for epoch in range(EPOCHS):
     for tokens in tqdm(train_loader, desc=f"[Epoch {epoch+1}] Train"):
         tokens = tokens.to(device)
         #style_vecs = style_encoder(torch.randn_like(tokens.unsqueeze(1).float()))  # Dummy input
-        # ✅ 수정된 코드
+        
         batch_size = tokens.size(0)
         dummy_imgs = torch.randn(batch_size, 1, 128, 128).float().to(device)
         style_vecs = style_encoder(dummy_imgs)
@@ -119,3 +119,4 @@ for epoch in range(EPOCHS):
     # 중간 저장
     torch.save(style_encoder.state_dict(), f"D:/바탕화면/project/models/style_encoder_epoch{epoch+1}.pt")
     torch.save(generator.state_dict(), f"D:/바탕화면/project/models/generator_epoch{epoch+1}.pt")
+
