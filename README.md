@@ -1,4 +1,4 @@
-###파이프라인
+### 파이프라인
 
 svg_tokenizer.py 를 통해 png를 으로 변환 후  potrace로 svg생성 -> 결과값train.pkl, val.pkl, test.pkl
 
